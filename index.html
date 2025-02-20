@@ -60,28 +60,33 @@
             <h3>Shape Controls</h3>
             <div class="control-row">
                 <label for="outerSides">Outer Sides:</label>
-                <input type="range" id="outerSides" value="6" min="3" max="12" step="1">
+                <input type="number" id="outerSides" value="6" min="3" max="12" step="1">
                 <span id="outerSidesValue" class="value-display">6</span>
             </div>
             <div class="control-row">
                 <label for="innerSides">Inner Sides:</label>
-                <input type="range" id="innerSides" value="5" min="3" max="12" step="1">
+                <input type="number" id="innerSides" value="5" min="3" max="12" step="1">
                 <span id="innerSidesValue" class="value-display">5</span>
             </div>
             <div class="control-row">
                 <label for="outerRadius">Outer Radius:</label>
-                <input type="range" id="outerRadius" value="300" min="200" max="390" step="10">
-                <span id="outerRadiusValue" class="value-display">300</span>
+                <input type="range" id="outerRadius" value="350" min="200" max="390" step="10">
+                <span id="outerRadiusValue" class="value-display">350</span>
             </div>
             <div class="control-row">
                 <label for="innerRadius">Inner Radius:</label>
-                <input type="range" id="innerRadius" value="120" min="50" max="200" step="10">
-                <span id="innerRadiusValue" class="value-display">120</span>
+                <input type="range" id="innerRadius" value="50" min="50" max="200" step="10">
+                <span id="innerRadiusValue" class="value-display">50</span>
             </div>
             <div class="control-row">
                 <label for="innerRotation">Inner Rotation:</label>
                 <input type="range" id="innerRotation" value="0" min="0" max="180" step="1">
                 <span id="innerRotationValue" class="value-display">0</span>
+            </div>
+            <div class="control-row">
+                <label for="outerRotation">Outer Rotation:</label>
+                <input type="range" id="outerRotation" value="0" min="0" max="180" step="1">
+                <span id="outerRotationValue" class="value-display">0</span>
             </div>
             <div class="control-row">
                 <label>Show Outlines:</label>
@@ -123,7 +128,7 @@
         </div>
 
         <div class="control-group">
-            <button onclick="generateAndDraw()">Generate New Pattern</button>
+            <button onclick="generateNew()">Generate New Pattern</button>
             <button onclick="downloadSVG()">Download SVG</button>
         </div>
     </div>

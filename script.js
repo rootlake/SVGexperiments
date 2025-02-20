@@ -3,24 +3,39 @@ let sliders = {};
 let valueDisplays = {};
 let checkboxes = {};
 
+function randomizePatternControls() {
+    // Randomize curve strength (0-100)
+    const curveStrength = Math.floor(Math.random() * 101);
+    sliders.curveStrength.value = curveStrength;
+    valueDisplays.curveStrength.textContent = curveStrength;
+    
+    // Randomize noise scale (0.001-0.1)
+    const noiseScale = (Math.random() * 0.099 + 0.001).toFixed(3);
+    sliders.noiseScale.value = noiseScale;
+    valueDisplays.noiseScale.textContent = noiseScale;
+    
+    // Randomize noise strength (0-2)
+    const noiseStrength = (Math.random() * 2).toFixed(1);
+    sliders.noiseStrength.value = noiseStrength;
+    valueDisplays.noiseStrength.textContent = noiseStrength;
+}
+
 function setup() {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     
     // Setup sliders and their value displays
-    const sliderIds = ['outerSides', 'innerSides', 'outerRadius', 'innerRadius', 'pointsPerSide', 'curveStrength', 'innerRotation', 'noiseScale', 'noiseStrength'];
+    const sliderIds = ['outerSides', 'innerSides', 'outerRadius', 'innerRadius', 'pointsPerSide', 'curveStrength', 'innerRotation', 'outerRotation', 'noiseScale', 'noiseStrength'];
     
     sliderIds.forEach(id => {
         sliders[id] = document.getElementById(id);
         valueDisplays[id] = document.getElementById(id + 'Value');
         
-        // Add listener to update value display
+        // Add listener to update value display and redraw
         sliders[id].addEventListener('input', function() {
             valueDisplays[id].textContent = this.value;
+            generateAndDraw();
         });
-        
-        // Generate pattern when slider is released
-        sliders[id].addEventListener('change', generateAndDraw);
     });
 
     // Setup checkboxes
@@ -29,6 +44,8 @@ function setup() {
         checkboxes[id].addEventListener('change', generateAndDraw);
     });
     
+    // Initial randomization and draw
+    randomizePatternControls();
     generateAndDraw();
 }
 
@@ -46,6 +63,7 @@ function generateAndDraw() {
     const totalPoints = parseInt(sliders.pointsPerSide.value) * outerSides;
     const curveStrength = parseInt(sliders.curveStrength.value);
     const innerRotation = parseInt(sliders.innerRotation.value) * (Math.PI / 180); // Convert to radians
+    const outerRotation = parseInt(sliders.outerRotation.value) * (Math.PI / 180); // Convert to radians
     const noiseScale = parseFloat(sliders.noiseScale.value);
     const noiseStrength = parseFloat(sliders.noiseStrength.value);
 
@@ -55,15 +73,15 @@ function generateAndDraw() {
     // Generate points for outer shape
     for (let i = 0; i < totalPoints; i++) {
         const t = i / totalPoints;
-        const angle = t * Math.PI * 2;
+        const angle = t * Math.PI * 2 + outerRotation;
         
         // Find which side of the polygon we're on
         const sideIndex = Math.floor(t * outerSides);
         const nextSideIndex = (sideIndex + 1) % outerSides;
         
         // Get the angles for this side
-        const angle1 = (sideIndex / outerSides) * Math.PI * 2;
-        const angle2 = (nextSideIndex / outerSides) * Math.PI * 2;
+        const angle1 = (sideIndex / outerSides) * Math.PI * 2 + outerRotation;
+        const angle2 = (nextSideIndex / outerSides) * Math.PI * 2 + outerRotation;
         
         // Get the endpoints of this side
         const x1 = centerX + Math.cos(angle1) * outerRadius;
@@ -123,7 +141,7 @@ function generateAndDraw() {
 
     // Draw shape outlines
     if (checkboxes.showOuter.checked) {
-        drawPolygon(outerSides, outerRadius, centerX, centerY);
+        drawPolygon(outerSides, outerRadius, centerX, centerY, outerRotation);
     }
     if (checkboxes.showInner.checked) {
         drawPolygon(innerSides, innerRadius, centerX, centerY, innerRotation);
@@ -148,7 +166,8 @@ function drawPolygon(sides, radius, centerX, centerY, rotation = 0) {
 function downloadSVG() {
     const outerSides = parseInt(sliders.outerSides.value);
     const innerSides = parseInt(sliders.innerSides.value);
-    const rotation = parseInt(sliders.innerRotation.value);
+    const innerRotationDeg = parseInt(sliders.innerRotation.value);
+    const outerRotationDeg = parseInt(sliders.outerRotation.value);
     
     // Create SVG content
     let svgContent = `<svg width="800" height="800" xmlns="http://www.w3.org/2000/svg">
@@ -161,7 +180,8 @@ function downloadSVG() {
     const innerRadius = parseInt(sliders.innerRadius.value);
     const totalPoints = parseInt(sliders.pointsPerSide.value) * outerSides;
     const curveStrength = parseInt(sliders.curveStrength.value);
-    const innerRotation = rotation * (Math.PI / 180);
+    const innerRotation = innerRotationDeg * (Math.PI / 180);
+    const outerRotation = outerRotationDeg * (Math.PI / 180);
     const noiseScale = parseFloat(sliders.noiseScale.value);
     const noiseStrength = parseFloat(sliders.noiseStrength.value);
 
@@ -174,8 +194,8 @@ function downloadSVG() {
         const sideIndex = Math.floor(t * outerSides);
         const nextSideIndex = (sideIndex + 1) % outerSides;
         
-        const angle1 = (sideIndex / outerSides) * Math.PI * 2;
-        const angle2 = (nextSideIndex / outerSides) * Math.PI * 2;
+        const angle1 = (sideIndex / outerSides) * Math.PI * 2 + outerRotation;
+        const angle2 = (nextSideIndex / outerSides) * Math.PI * 2 + outerRotation;
         
         const x1 = centerX + Math.cos(angle1) * outerRadius;
         const y1 = centerY + Math.sin(angle1) * outerRadius;
@@ -232,7 +252,7 @@ function downloadSVG() {
     // Add shape outlines if enabled
     if (checkboxes.showOuter.checked) {
         svgContent += `
-            <path d="M ${getPolygonPath(outerSides, outerRadius, centerX, centerY)}"/>`;
+            <path d="M ${getPolygonPath(outerSides, outerRadius, centerX, centerY, outerRotation)}"/>`;
     }
     if (checkboxes.showInner.checked) {
         svgContent += `
@@ -242,7 +262,7 @@ function downloadSVG() {
     svgContent += `</g></svg>`;
     
     // Generate filename based on parameters
-    const filename = `pattern_o${outerSides}i${innerSides}_r${rotation}_c${curveStrength}.svg`;
+    const filename = `pattern_o${outerSides}i${innerSides}_ro${outerRotationDeg}_ri${innerRotationDeg}_c${curveStrength}.svg`;
     
     // Create download link
     const blob = new Blob([svgContent], { type: 'image/svg+xml' });
@@ -303,6 +323,12 @@ function getCurveControlPoints(inner, outer, curveStrength, noiseScale, noiseStr
             y: inner.y + dy * cp2Dist + normPerpY * curveOffset
         }
     };
+}
+
+// New function to handle Generate New button click
+function generateNew() {
+    randomizePatternControls();
+    generateAndDraw();
 }
 
 // Initialize when page loads
